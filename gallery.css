@@ -1,11 +1,7 @@
 *{
     margin: 0;
 }
-.container {
 
-    padding: 20px;
-   
-  }
   
   button,
   button::after {
@@ -102,8 +98,7 @@ h1
     font-size: 35pt;
     font-weight: lighter;
     
-    margin-bottom: 20px;
-    margin-top: 70px;
+    
    
     
 }
@@ -115,7 +110,7 @@ h1
 #h1,h2{
     color: white;
     text-align: center;
-
+margin: 120;
 }
 ul{
   list-style:none;
