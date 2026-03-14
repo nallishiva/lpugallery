@@ -66,6 +66,16 @@
       border-color: rgba(201,168,76,0.9);
     }
 
+    /* CSS-only cursor ring expansion — works on ALL elements, no JS needed */
+    a:hover ~ #cursorRing,
+    button:hover ~ #cursorRing { transform: translate(-50%, -50%) scale(1.8); }
+
+    /* We use a simpler trick: body data attribute toggled by JS on hover */
+    body.on-hover .cursor-ring {
+      transform: translate(-50%, -50%) scale(1.8);
+      border-color: rgba(201,168,76,0.9);
+    }
+
     /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 500;
@@ -207,14 +217,12 @@
       width: 100vw; height: 100vh;
       z-index: 9000;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       background: rgba(0,0,0,0);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease, background 0.3s ease;
-      padding: 20px 80px;
     }
     .lightbox.open {
       opacity: 1;
@@ -222,54 +230,44 @@
       background: rgba(0,0,0,0.95);
     }
 
-    .lb-topbar {
-      width: 100%; max-width: 920px;
-      display: flex; justify-content: flex-end;
-      flex-shrink: 0; margin-bottom: 8px;
-    }
+    /* Close button — absolute top-right, does NOT affect image centering */
     .lb-close {
-      width: 40px; height: 40px;
+      position: absolute;
+      top: 20px; right: 20px;
+      width: 44px; height: 44px;
       border: 1px solid rgba(255,255,255,0.2);
-      background: transparent; color: rgba(255,255,255,0.55);
-      font-size: 15px;
+      background: rgba(0,0,0,0.5);
+      color: rgba(255,255,255,0.6);
+      font-size: 16px; z-index: 10;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.25s;
     }
-    .lb-close:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
+    .lb-close:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
 
+    /* Image wrapper — centered in the full viewport */
     .lb-img-wrap {
       position: relative;
-      max-width: 920px; width: 100%;
-      max-height: calc(100vh - 152px);
+      max-width: 90vw;
+      max-height: 85vh;
       display: flex; align-items: center; justify-content: center;
-      overflow: hidden; flex-shrink: 1;
     }
     .lb-img-wrap img {
       display: block;
-      max-width: 100%;
-      max-height: calc(100vh - 152px);
+      max-width: 90vw;
+      max-height: 82vh;
       width: auto; height: auto;
       object-fit: contain;
       transition: opacity 0.2s ease, transform 0.2s ease;
     }
     .lb-img-wrap.fade img { opacity: 0; transform: scale(0.97); }
 
-    .lb-frame { position: absolute; inset: -8px; pointer-events: none; z-index: 1; }
-    .lb-frame::before {
-      content: ''; position: absolute; top: 0; left: 0;
-      width: 26px; height: 26px;
-      border-top: 2px solid var(--gold); border-left: 2px solid var(--gold);
-    }
-    .lb-frame::after {
-      content: ''; position: absolute; bottom: 0; right: 0;
-      width: 26px; height: 26px;
-      border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold);
-    }
-
+    /* Caption — absolute bottom so it never affects centering */
     .lb-caption {
-      width: 100%; max-width: 920px;
+      position: absolute;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      width: 90vw;
       display: flex; justify-content: space-between; align-items: center;
-      margin-top: 12px; flex-shrink: 0;
     }
     .lb-counter { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; color: var(--gold); }
     .lb-hint { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.2); }
@@ -342,9 +340,7 @@
 
   <!-- LIGHTBOX -->
   <div class="lightbox" id="lightbox">
-    <div class="lb-topbar">
-      <button class="lb-close" id="lbClose">✕</button>
-    </div>
+    <button class="lb-close" id="lbClose">✕</button>
     <div class="lb-img-wrap" id="lbImgWrap">
       <div class="lb-frame"></div>
       <img src="" alt="LPU Campus" id="lbImg">
@@ -413,7 +409,7 @@
         item.className = 'masonry-item';
         item.dataset.index = i;
         item.innerHTML = `
-          <img src="${src}" alt="LPU Campus photo ${i + 1}" loading="lazy">
+          <img src="${src}" alt="LPU Campus photo ${i + 1}">
           <div class="overlay"></div>
           <div class="item-label">
             <span class="item-num">${String(i + 1).padStart(2, '0')}</span>
@@ -421,10 +417,6 @@
 
         // Direct click listener on each item — no delegation needed
         item.addEventListener('click', () => openLightbox(i));
-
-        // Direct mouseenter/mouseleave on each item for cursor ring
-        item.addEventListener('mouseenter', () => curRing.classList.add('big'));
-        item.addEventListener('mouseleave', () => curRing.classList.remove('big'));
 
         cols[i % colCount].appendChild(item);
         allItems.push(item);
@@ -508,8 +500,8 @@
     }, { passive: true });
 
     // ── CUSTOM CURSOR ──
-    // mouseenter/mouseleave are attached directly on each item inside buildGrid()
-    // so cursor ring works on ALL photos regardless of scroll position
+    // Pure JS for position only — no mouseenter/mouseleave needed
+    // The ring scale is handled by CSS :hover on the elements directly
     const curDot  = document.getElementById('cursor');
     const curRing = document.getElementById('cursorRing');
     let mx = 0, my = 0, rx = 0, ry = 0;
@@ -518,6 +510,13 @@
       mx = e.clientX; my = e.clientY;
       curDot.style.left = mx + 'px';
       curDot.style.top  = my + 'px';
+      // Check if we're hovering over an interactive element right now
+      const el = document.elementFromPoint(mx, my);
+      if (el && el.closest('.masonry-item, a, button')) {
+        curRing.classList.add('big');
+      } else {
+        curRing.classList.remove('big');
+      }
     });
 
     (function ringLoop() {
@@ -527,12 +526,6 @@
       curRing.style.top  = ry + 'px';
       requestAnimationFrame(ringLoop);
     })();
-
-    // Nav links and buttons also trigger cursor ring
-    document.querySelectorAll('a, button').forEach(el => {
-      el.addEventListener('mouseenter', () => curRing.classList.add('big'));
-      el.addEventListener('mouseleave', () => curRing.classList.remove('big'));
-    });
   </script>
 </body>
 </html>
