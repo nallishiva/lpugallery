@@ -25,7 +25,7 @@
       --white: #ffffff;
     }
 
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; }
     html { scroll-behavior: smooth; }
 
     body {
@@ -34,7 +34,6 @@
       font-family: 'Outfit', sans-serif;
       font-weight: 300;
       overflow-x: hidden;
-      cursor: none;
       /* Fade-in on page load */
       opacity: 0;
       animation: pageEnter 0.7s ease 0.1s forwards;
@@ -165,12 +164,12 @@
     }
     .masonry-item:hover .overlay { opacity: 1; }
 
-    /* Bottom label on hover */
+    /* Bottom label on hover — number only */
     .masonry-item .item-label {
       position: absolute; bottom: 0; left: 0; right: 0;
       padding: 32px 16px 14px;
       background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
-      display: flex; justify-content: space-between; align-items: flex-end;
+      display: flex; align-items: flex-end;
       opacity: 0;
       transform: translateY(6px);
       transition: all 0.35s ease;
@@ -180,10 +179,6 @@
       font-family: 'Cormorant Garamond', serif;
       font-size: 28px; font-weight: 300;
       color: rgba(201,168,76,0.7); line-height: 1;
-    }
-    .item-expand {
-      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-      color: rgba(255,255,255,0.6);
     }
 
     /* Gold corner accent on hover */
@@ -219,6 +214,7 @@
       display: flex; align-items: center; justify-content: center;
       opacity: 0; pointer-events: none;
       transition: opacity 0.35s ease, background 0.35s ease;
+      padding: 20px;
     }
     .lightbox.open {
       opacity: 1; pointer-events: all;
@@ -227,24 +223,32 @@
 
     .lb-inner {
       position: relative;
-      max-width: min(88vw, 1100px);
-      max-height: 88vh;
+      width: 100%;
+      max-width: 1000px;
+      /* Total height budget: viewport minus close button (52px) minus caption (60px) minus gaps */
+      max-height: calc(100vh - 40px);
       transform: scale(0.92);
       transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
       display: flex; flex-direction: column; align-items: center;
+      gap: 16px;
     }
     .lightbox.open .lb-inner { transform: scale(1); }
 
     .lb-img-wrap {
       position: relative;
-      max-width: 100%; max-height: 80vh;
+      /* Reserve space: close btn ~52px top + caption ~50px bottom + gaps ~48px = ~150px */
+      max-height: calc(100vh - 150px);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
     }
     .lb-img-wrap img {
-      max-width: min(88vw, 1100px);
-      max-height: 80vh;
+      max-width: min(90vw, 1000px);
+      max-height: calc(100vh - 150px);
+      width: auto; height: auto;
       object-fit: contain;
       display: block;
       filter: brightness(0.97) contrast(1.04);
+      transition: opacity 0.25s ease, transform 0.25s ease;
     }
 
     /* Corner frame */
@@ -265,9 +269,9 @@
 
     /* Caption */
     .lb-caption {
-      margin-top: 20px;
       display: flex; align-items: center; gap: 20px;
       width: 100%; justify-content: space-between;
+      flex-shrink: 0;
     }
     .lb-counter {
       font-family: 'Cormorant Garamond', serif;
@@ -283,15 +287,15 @@
     }
     .lb-credit span { color: var(--gold); }
 
-    /* Close button */
+    /* Close button — sits above the image as part of flex flow */
     .lb-close {
-      position: absolute; top: -52px; right: 0;
+      align-self: flex-end;
       width: 40px; height: 40px;
       border: 1px solid rgba(255,255,255,0.2);
       background: transparent; color: rgba(255,255,255,0.5);
-      font-size: 16px; cursor: pointer;
+      font-size: 16px; cursor: none !important;
       display: flex; align-items: center; justify-content: center;
-      transition: all 0.3s;
+      transition: all 0.3s; flex-shrink: 0;
     }
     .lb-close:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
 
@@ -316,9 +320,6 @@
     /* Image transition */
     .lb-img-wrap.switching img {
       opacity: 0; transform: scale(0.97);
-    }
-    .lb-img-wrap img {
-      transition: opacity 0.25s ease, transform 0.25s ease;
     }
 
     /* ── FOOTER ── */
@@ -447,7 +448,6 @@
         <div class="overlay"></div>
         <div class="item-label">
           <span class="item-num">${String(i+1).padStart(2,'0')}</span>
-          <span class="item-expand">expand</span>
         </div>`;
       item.addEventListener('click', () => openLightbox(i));
       grid.appendChild(item);
