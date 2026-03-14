@@ -22,12 +22,7 @@
       --white: #ffffff;
     }
 
-    *, *::before, *::after {
-      margin: 0; padding: 0;
-      box-sizing: border-box;
-      cursor: none !important;
-    }
-
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
 
     body {
@@ -41,39 +36,8 @@
     }
 
     @keyframes pageEnter {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── CUSTOM CURSOR ── */
-    .cursor {
-      position: fixed; width: 8px; height: 8px;
-      background: var(--gold); border-radius: 50%;
-      pointer-events: none; z-index: 99999;
-      transform: translate(-50%, -50%);
-      will-change: left, top;
-    }
-    .cursor-ring {
-      position: fixed; width: 36px; height: 36px;
-      border: 1px solid rgba(201,168,76,0.55); border-radius: 50%;
-      pointer-events: none; z-index: 99998;
-      transform: translate(-50%, -50%);
-      transition: border-color 0.15s, transform 0.15s;
-      will-change: left, top;
-    }
-    .cursor-ring.big {
-      transform: translate(-50%, -50%) scale(1.8);
-      border-color: rgba(201,168,76,0.9);
-    }
-
-    /* CSS-only cursor ring expansion — works on ALL elements, no JS needed */
-    a:hover ~ #cursorRing,
-    button:hover ~ #cursorRing { transform: translate(-50%, -50%) scale(1.8); }
-
-    /* We use a simpler trick: body data attribute toggled by JS on hover */
-    body.on-hover .cursor-ring {
-      transform: translate(-50%, -50%) scale(1.8);
-      border-color: rgba(201,168,76,0.9);
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
 
     /* ── NAV ── */
@@ -129,163 +93,145 @@
       color: rgba(201,168,76,0.12); line-height: 1; letter-spacing: -2px;
     }
     .photo-count span {
-      font-size: 12px; letter-spacing: 3px;
-      color: rgba(255,255,255,0.28); display: block;
-      text-align: right; font-family: 'Outfit', sans-serif; margin-top: 4px;
+      font-size: 12px; letter-spacing: 3px; color: rgba(255,255,255,0.28);
+      display: block; text-align: right;
+      font-family: 'Outfit', sans-serif; margin-top: 4px;
     }
 
-    /* ── JS MASONRY — 4 flex columns side by side ── */
+    /* ── MASONRY GRID ── */
     .masonry-wrap { padding: 40px 36px 80px; }
+    .masonry-row { display: flex; gap: 6px; align-items: flex-start; }
+    .masonry-col { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
-    /* The outer row is just a flex container */
-    .masonry-row {
-      display: flex;
-      gap: 6px;
-      align-items: flex-start; /* columns independent — no stretching */
-    }
-
-    /* Each column is a flex column */
-    .masonry-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    /* Each photo card */
     .masonry-item {
       position: relative;
       overflow: hidden;
       display: block;
       width: 100%;
-      /* NO break-inside, NO columns weirdness */
+      cursor: pointer;
     }
 
+    /* Image zoom on hover — pure CSS, works on every image always */
     .masonry-item img {
-      width: 100%;
-      display: block;
-      transition: transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94),
-                  filter 0.4s ease;
-      filter: brightness(0.85) contrast(1.06) saturate(0.9);
+      width: 100%; display: block;
+      transition: transform 0.5s ease, filter 0.4s ease;
+      filter: brightness(0.85) contrast(1.05);
     }
     .masonry-item:hover img {
-      transform: scale(1.05);
-      filter: brightness(1.0) contrast(1.08) saturate(1.1);
+      transform: scale(1.06);
+      filter: brightness(1.0) contrast(1.08);
     }
 
-    /* Gold corner accents */
-    .masonry-item::before,
+    /* Gold border on hover — pure CSS inset outline */
     .masonry-item::after {
-      content: ''; position: absolute;
-      width: 0; height: 0;
-      transition: width 0.28s ease, height 0.28s ease;
-      z-index: 3; pointer-events: none;
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 3px solid var(--gold);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 3;
     }
-    .masonry-item::before { top: 0; left: 0; border-top: 0px solid var(--gold); border-left: 0px solid var(--gold); }
-    .masonry-item::after  { bottom: 0; right: 0; border-bottom: 0px solid var(--gold); border-right: 0px solid var(--gold); }
-    .masonry-item:hover::before { width: 26px; height: 26px; border-top: 2px solid var(--gold); border-left: 2px solid var(--gold); }
-    .masonry-item:hover::after  { width: 26px; height: 26px; border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold); }
+    .masonry-item:hover::after { opacity: 1; }
 
-    /* Gold shimmer on hover */
+    /* Dark gradient + number on hover */
     .masonry-item .overlay {
       position: absolute; inset: 0; z-index: 1; pointer-events: none;
-      background: linear-gradient(135deg, transparent 55%, rgba(201,168,76,0.15) 100%);
-      opacity: 0; transition: opacity 0.4s ease;
+      background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%);
+      opacity: 0; transition: opacity 0.3s ease;
     }
     .masonry-item:hover .overlay { opacity: 1; }
 
-    /* Photo number label */
-    .masonry-item .item-label {
-      position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
-      padding: 28px 14px 12px;
-      background: linear-gradient(to top, rgba(0,0,0,0.72), transparent);
-      opacity: 0; transform: translateY(5px);
-      transition: opacity 0.3s, transform 0.3s;
+    .masonry-item .item-num {
+      position: absolute; bottom: 12px; left: 16px; z-index: 2;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px; font-weight: 300;
+      color: rgba(201,168,76,0.85); line-height: 1;
+      opacity: 0; transform: translateY(6px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
       pointer-events: none;
     }
-    .masonry-item:hover .item-label { opacity: 1; transform: translateY(0); }
-    .item-num {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 26px; font-weight: 300;
-      color: rgba(201,168,76,0.75); line-height: 1;
-    }
+    .masonry-item:hover .item-num { opacity: 1; transform: translateY(0); }
 
     /* ── LIGHTBOX ── */
-    .lightbox {
+    #lightbox {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      z-index: 9000;
+      z-index: 9999;
+      background: rgba(0,0,0,0.95);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0,0,0,0);
       opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease, background 0.3s ease;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-    .lightbox.open {
+    #lightbox.open {
       opacity: 1;
-      pointer-events: all;
-      background: rgba(0,0,0,0.95);
+      visibility: visible;
     }
 
-    /* Close button — absolute top-right, does NOT affect image centering */
-    .lb-close {
-      position: absolute;
-      top: 20px; right: 20px;
+    /* Close button top-right */
+    #lbClose {
+      position: fixed;
+      top: 20px; right: 24px;
       width: 44px; height: 44px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(0,0,0,0.5);
-      color: rgba(255,255,255,0.6);
-      font-size: 16px; z-index: 10;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.7);
+      font-size: 18px;
       display: flex; align-items: center; justify-content: center;
-      transition: all 0.25s;
+      cursor: pointer; z-index: 10000;
+      transition: border-color 0.2s, color 0.2s;
     }
-    .lb-close:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+    #lbClose:hover { border-color: var(--gold); color: var(--gold); }
 
-    /* Image wrapper — centered in the full viewport */
-    .lb-img-wrap {
-      position: relative;
-      max-width: 90vw;
-      max-height: 85vh;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .lb-img-wrap img {
+    /* The image — direct flex child of #lightbox so it centers perfectly */
+    #lbImg {
       display: block;
-      max-width: 90vw;
-      max-height: 82vh;
+      max-width: 88vw;
+      max-height: 88vh;
       width: auto; height: auto;
       object-fit: contain;
-      transition: opacity 0.2s ease, transform 0.2s ease;
+      transition: opacity 0.2s ease;
+      border: 2px solid rgba(201,168,76,0.4);
+      margin: auto;
     }
-    .lb-img-wrap.fade img { opacity: 0; transform: scale(0.97); }
+    #lbImg.fade { opacity: 0; }
 
-    /* Caption — absolute bottom so it never affects centering */
-    .lb-caption {
-      position: absolute;
+    /* Caption bottom */
+    #lbCaption {
+      position: fixed;
       bottom: 20px; left: 50%;
       transform: translateX(-50%);
       width: 90vw;
       display: flex; justify-content: space-between; align-items: center;
+      pointer-events: none;
     }
-    .lb-counter { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; color: var(--gold); }
-    .lb-hint { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.2); }
-    .lb-credit { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.3); }
-    .lb-credit span { color: var(--gold); }
+    #lbCounter {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 300; color: var(--gold);
+    }
+    #lbHint { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.2); }
+    #lbCredit { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+    #lbCredit span { color: var(--gold); }
 
-    .lb-prev, .lb-next {
+    /* Prev / Next arrows */
+    #lbPrev, #lbNext {
       position: fixed; top: 50%; transform: translateY(-50%);
       width: 52px; height: 52px;
+      background: rgba(0,0,0,0.6);
       border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
-      color: rgba(255,255,255,0.75); font-size: 22px;
+      color: rgba(255,255,255,0.8); font-size: 22px;
       display: none; align-items: center; justify-content: center;
-      transition: all 0.25s; z-index: 9100;
+      cursor: pointer; z-index: 10000;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
     }
-    .lb-prev { left: 14px; }
-    .lb-next { right: 14px; }
-    .lb-prev:hover, .lb-next:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.12); }
+    #lbPrev { left: 14px; }
+    #lbNext { right: 14px; }
+    #lbPrev:hover, #lbNext:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
 
     /* ── FOOTER ── */
     footer {
@@ -296,25 +242,18 @@
     .footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 300; letter-spacing: 4px; color: var(--gold); }
     .footer-copy { font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 1px; }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 1200px) { .masonry-row { /* 3 cols handled by JS */ } }
     @media (max-width: 768px) {
-      nav { padding: 16px 20px; }
-      .nav-links { gap: 24px; }
+      nav { padding: 16px 20px; } .nav-links { gap: 24px; }
       .page-header { padding: 36px 20px 28px; flex-direction: column; align-items: flex-start; gap: 12px; }
       .masonry-wrap { padding: 20px 10px 60px; }
-      .lightbox { padding: 16px 56px; }
-      .lb-hint { display: none; }
-      .lb-prev { left: 4px; width: 40px; height: 40px; font-size: 18px; }
-      .lb-next { right: 4px; width: 40px; height: 40px; font-size: 18px; }
+      #lbHint { display: none; }
+      #lbPrev { left: 6px; width: 40px; height: 40px; font-size: 18px; }
+      #lbNext { right: 6px; width: 40px; height: 40px; font-size: 18px; }
       footer { flex-direction: column; gap: 10px; text-align: center; padding: 28px 20px; }
     }
   </style>
 </head>
 <body>
-
-  <div class="cursor" id="cursor"></div>
-  <div class="cursor-ring" id="cursorRing"></div>
 
   <nav>
     <a href="index.html" class="nav-logo">LPU Clicks</a>
@@ -334,25 +273,21 @@
   </div>
 
   <div class="masonry-wrap">
-    <!-- JS builds the columns here -->
     <div class="masonry-row" id="masonryRow"></div>
   </div>
 
-  <!-- LIGHTBOX -->
-  <div class="lightbox" id="lightbox">
-    <button class="lb-close" id="lbClose">✕</button>
-    <div class="lb-img-wrap" id="lbImgWrap">
-      <div class="lb-frame"></div>
-      <img src="" alt="LPU Campus" id="lbImg">
-    </div>
-    <div class="lb-caption">
-      <span class="lb-counter" id="lbCounter">01 / 29</span>
-      <span class="lb-hint">← → keys · ESC to close · swipe on mobile</span>
-      <span class="lb-credit">@<span>_____shiva_</span></span>
-    </div>
+  <!-- LIGHTBOX — sits directly on body, nothing wrapping it -->
+  <div id="lightbox">
+    <img id="lbImg" src="" alt="LPU Campus">
   </div>
-  <button class="lb-prev" id="lbPrev">&#8592;</button>
-  <button class="lb-next" id="lbNext">&#8594;</button>
+  <button id="lbClose">✕</button>
+  <div id="lbCaption">
+    <span id="lbCounter">01 / 29</span>
+    <span id="lbHint">← → keys · ESC to close · swipe on mobile</span>
+    <span id="lbCredit">@<span>_____shiva_</span></span>
+  </div>
+  <button id="lbPrev">&#8592;</button>
+  <button id="lbNext">&#8594;</button>
 
   <footer>
     <div class="footer-brand">LPU Clicks</div>
@@ -373,9 +308,7 @@
       'gallery.jpg/img3.jpg', 'gallery.jpg/img2.jpg',
     ];
 
-    // ── BUILD JS MASONRY ──
-    // Instead of CSS columns (which breaks hover), we create real separate
-    // column divs and distribute photos into them like Pinterest does.
+    // ── BUILD GRID ──
     function getColCount() {
       const w = window.innerWidth;
       if (w <= 480) return 1;
@@ -385,15 +318,11 @@
     }
 
     const row = document.getElementById('masonryRow');
-    // Store all item elements in order so lightbox can find them by index
-    const allItems = [];
 
     function buildGrid() {
       const colCount = getColCount();
-      row.innerHTML = ''; // clear
-      allItems.length = 0;
+      row.innerHTML = '';
 
-      // Create column divs
       const cols = [];
       for (let c = 0; c < colCount; c++) {
         const col = document.createElement('div');
@@ -402,30 +331,22 @@
         cols.push(col);
       }
 
-      // Distribute photos: round-robin into columns (0,1,2,3,0,1,2,3,...)
-      // This is the simplest Pinterest-style distribution
       photos.forEach((src, i) => {
         const item = document.createElement('div');
         item.className = 'masonry-item';
-        item.dataset.index = i;
+        // Pure HTML — no JS hover listeners needed at all
+        // CSS :hover handles everything
         item.innerHTML = `
           <img src="${src}" alt="LPU Campus photo ${i + 1}">
           <div class="overlay"></div>
-          <div class="item-label">
-            <span class="item-num">${String(i + 1).padStart(2, '0')}</span>
-          </div>`;
-
-        // Direct click listener on each item — no delegation needed
+          <span class="item-num">${String(i + 1).padStart(2, '0')}</span>`;
         item.addEventListener('click', () => openLightbox(i));
-
         cols[i % colCount].appendChild(item);
-        allItems.push(item);
       });
     }
 
     buildGrid();
 
-    // Rebuild on resize so column count stays correct
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
@@ -433,53 +354,70 @@
     });
 
     // ── LIGHTBOX ──
-    const lb     = document.getElementById('lightbox');
-    const lbImg  = document.getElementById('lbImg');
-    const lbWrap = document.getElementById('lbImgWrap');
-    const lbCtr  = document.getElementById('lbCounter');
-    const lbPrev = document.getElementById('lbPrev');
-    const lbNext = document.getElementById('lbNext');
-    let current  = 0;
-
-    function updateCounter() {
-      lbCtr.textContent = `${String(current + 1).padStart(2, '0')} / ${photos.length}`;
-    }
+    const lb      = document.getElementById('lightbox');
+    const lbImg   = document.getElementById('lbImg');
+    const lbCtr   = document.getElementById('lbCounter');
+    const lbClose = document.getElementById('lbClose');
+    const lbPrev  = document.getElementById('lbPrev');
+    const lbNext  = document.getElementById('lbNext');
+    const lbCap   = document.getElementById('lbCaption');
+    let current   = 0;
 
     function openLightbox(idx) {
       current = idx;
-      // Get src from the already-loaded thumbnail — never blank
-      const thumb = allItems[current].querySelector('img');
-      lbImg.src = thumb.currentSrc || thumb.src;
-      updateCounter();
+      lbImg.src = photos[current];
+      lbCtr.textContent = `${String(current + 1).padStart(2, '0')} / ${photos.length}`;
       lb.classList.add('open');
-      lbPrev.style.display = 'flex';
-      lbNext.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
+      lbClose.style.display = 'flex';
+      lbPrev.style.display  = 'flex';
+      lbNext.style.display  = 'flex';
+      lbCap.style.display   = 'flex';
+      // Lock body scroll WITHOUT shifting the page position
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.dataset.scrollY = scrollY;
     }
 
     function closeLightbox() {
       lb.classList.remove('open');
-      lbPrev.style.display = 'none';
-      lbNext.style.display = 'none';
-      document.body.style.overflow = '';
+      lbClose.style.display = 'none';
+      lbPrev.style.display  = 'none';
+      lbNext.style.display  = 'none';
+      lbCap.style.display   = 'none';
+      // Restore scroll position exactly where user was
+      const scrollY = parseInt(document.body.dataset.scrollY || '0');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollY);
     }
 
     function navigate(dir) {
       current = (current + dir + photos.length) % photos.length;
-      lbWrap.classList.add('fade');
+      lbImg.classList.add('fade');
       setTimeout(() => {
-        const thumb = allItems[current].querySelector('img');
-        lbImg.src = thumb.currentSrc || thumb.src;
-        updateCounter();
-        lbWrap.classList.remove('fade');
-      }, 180);
+        lbImg.src = photos[current];
+        lbCtr.textContent = `${String(current + 1).padStart(2, '0')} / ${photos.length}`;
+        lbImg.classList.remove('fade');
+      }, 200);
     }
 
-    document.getElementById('lbClose').onclick = closeLightbox;
-    lbPrev.onclick = () => navigate(-1);
-    lbNext.onclick = () => navigate(1);
+    // Hide caption/arrows by default
+    lbClose.style.display = 'none';
+    lbPrev.style.display  = 'none';
+    lbNext.style.display  = 'none';
+    lbCap.style.display   = 'none';
+
+    lbClose.onclick = closeLightbox;
+    lbPrev.onclick  = () => navigate(-1);
+    lbNext.onclick  = () => navigate(1);
+
+    // Click dark backdrop to close
     lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
 
+    // Keyboard
     document.addEventListener('keydown', e => {
       if (!lb.classList.contains('open')) return;
       if (e.key === 'Escape')     closeLightbox();
@@ -487,45 +425,16 @@
       if (e.key === 'ArrowRight') navigate(1);
     });
 
-    // Touch swipe for mobile
+    // Swipe on mobile
     let tsX = 0, tsY = 0;
     lb.addEventListener('touchstart', e => {
-      tsX = e.touches[0].clientX;
-      tsY = e.touches[0].clientY;
+      tsX = e.touches[0].clientX; tsY = e.touches[0].clientY;
     }, { passive: true });
     lb.addEventListener('touchend', e => {
       const dx = e.changedTouches[0].clientX - tsX;
       const dy = e.changedTouches[0].clientY - tsY;
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) navigate(dx < 0 ? 1 : -1);
     }, { passive: true });
-
-    // ── CUSTOM CURSOR ──
-    // Pure JS for position only — no mouseenter/mouseleave needed
-    // The ring scale is handled by CSS :hover on the elements directly
-    const curDot  = document.getElementById('cursor');
-    const curRing = document.getElementById('cursorRing');
-    let mx = 0, my = 0, rx = 0, ry = 0;
-
-    document.addEventListener('mousemove', e => {
-      mx = e.clientX; my = e.clientY;
-      curDot.style.left = mx + 'px';
-      curDot.style.top  = my + 'px';
-      // Check if we're hovering over an interactive element right now
-      const el = document.elementFromPoint(mx, my);
-      if (el && el.closest('.masonry-item, a, button')) {
-        curRing.classList.add('big');
-      } else {
-        curRing.classList.remove('big');
-      }
-    });
-
-    (function ringLoop() {
-      rx += (mx - rx) * 0.12;
-      ry += (my - ry) * 0.12;
-      curRing.style.left = rx + 'px';
-      curRing.style.top  = ry + 'px';
-      requestAnimationFrame(ringLoop);
-    })();
   </script>
 </body>
 </html>
