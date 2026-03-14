@@ -19,11 +19,9 @@
     :root {
       --gold: #c9a84c;
       --dark: #0d0d0d;
-      --dark-3: #1c1c1c;
       --white: #ffffff;
     }
 
-    /* Hide native cursor on EVERY element */
     *, *::before, *::after {
       margin: 0; padding: 0;
       box-sizing: border-box;
@@ -60,10 +58,10 @@
       border: 1px solid rgba(201,168,76,0.55); border-radius: 50%;
       pointer-events: none; z-index: 99998;
       transform: translate(-50%, -50%);
-      transition: border-color 0.2s, transform 0.2s;
+      transition: border-color 0.15s, transform 0.15s;
       will-change: left, top;
     }
-    .cursor-ring.hovered {
+    .cursor-ring.big {
       transform: translate(-50%, -50%) scale(1.8);
       border-color: rgba(201,168,76,0.9);
     }
@@ -126,23 +124,38 @@
       text-align: right; font-family: 'Outfit', sans-serif; margin-top: 4px;
     }
 
-    /* ── MASONRY GRID ── */
+    /* ── JS MASONRY — 4 flex columns side by side ── */
     .masonry-wrap { padding: 40px 36px 80px; }
-    .masonry { columns: 4; column-gap: 6px; }
-    @media (max-width: 1200px) { .masonry { columns: 3; } }
-    @media (max-width: 800px)  { .masonry { columns: 2; } }
-    @media (max-width: 480px)  { .masonry { columns: 1; } }
 
+    /* The outer row is just a flex container */
+    .masonry-row {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start; /* columns independent — no stretching */
+    }
+
+    /* Each column is a flex column */
+    .masonry-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Each photo card */
     .masonry-item {
-      break-inside: avoid;
-      margin-bottom: 6px;
       position: relative;
       overflow: hidden;
       display: block;
+      width: 100%;
+      /* NO break-inside, NO columns weirdness */
     }
+
     .masonry-item img {
-      width: 100%; display: block;
-      transition: transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.4s ease;
+      width: 100%;
+      display: block;
+      transition: transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94),
+                  filter 0.4s ease;
       filter: brightness(0.85) contrast(1.06) saturate(0.9);
     }
     .masonry-item:hover img {
@@ -151,10 +164,11 @@
     }
 
     /* Gold corner accents */
-    .masonry-item::before, .masonry-item::after {
+    .masonry-item::before,
+    .masonry-item::after {
       content: ''; position: absolute;
       width: 0; height: 0;
-      transition: width 0.3s ease, height 0.3s ease, border-color 0.3s;
+      transition: width 0.28s ease, height 0.28s ease;
       z-index: 3; pointer-events: none;
     }
     .masonry-item::before { top: 0; left: 0; border-top: 0px solid var(--gold); border-left: 0px solid var(--gold); }
@@ -162,7 +176,7 @@
     .masonry-item:hover::before { width: 26px; height: 26px; border-top: 2px solid var(--gold); border-left: 2px solid var(--gold); }
     .masonry-item:hover::after  { width: 26px; height: 26px; border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold); }
 
-    /* Shimmer overlay */
+    /* Gold shimmer on hover */
     .masonry-item .overlay {
       position: absolute; inset: 0; z-index: 1; pointer-events: none;
       background: linear-gradient(135deg, transparent 55%, rgba(201,168,76,0.15) 100%);
@@ -170,7 +184,7 @@
     }
     .masonry-item:hover .overlay { opacity: 1; }
 
-    /* Photo number */
+    /* Photo number label */
     .masonry-item .item-label {
       position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
       padding: 28px 14px 12px;
@@ -186,10 +200,7 @@
       color: rgba(201,168,76,0.75); line-height: 1;
     }
 
-    /* ── LIGHTBOX ──
-       FIX: position:fixed + explicit 100vw/100vh + flex center
-       so image is ALWAYS centered on screen, unaffected by scroll position
-    */
+    /* ── LIGHTBOX ── */
     .lightbox {
       position: fixed;
       top: 0; left: 0;
@@ -203,7 +214,6 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease, background 0.3s ease;
-      /* Side padding = space for the arrow buttons */
       padding: 20px 80px;
     }
     .lightbox.open {
@@ -212,7 +222,6 @@
       background: rgba(0,0,0,0.95);
     }
 
-    /* Close button row */
     .lb-topbar {
       width: 100%; max-width: 920px;
       display: flex; justify-content: flex-end;
@@ -228,8 +237,6 @@
     }
     .lb-close:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
 
-    /* Image — constrained so it NEVER overflows:
-       total chrome = topbar(48px) + margin(8px) + caption(44px) + margin(12px) + padding(40px) = ~152px */
     .lb-img-wrap {
       position: relative;
       max-width: 920px; width: 100%;
@@ -247,56 +254,40 @@
     }
     .lb-img-wrap.fade img { opacity: 0; transform: scale(0.97); }
 
-    /* Gold corner frame on photo */
     .lb-frame { position: absolute; inset: -8px; pointer-events: none; z-index: 1; }
     .lb-frame::before {
-      content: ''; position: absolute; top: 0; left: 0; width: 26px; height: 26px;
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 26px; height: 26px;
       border-top: 2px solid var(--gold); border-left: 2px solid var(--gold);
     }
     .lb-frame::after {
-      content: ''; position: absolute; bottom: 0; right: 0; width: 26px; height: 26px;
+      content: ''; position: absolute; bottom: 0; right: 0;
+      width: 26px; height: 26px;
       border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold);
     }
 
-    /* Caption */
     .lb-caption {
       width: 100%; max-width: 920px;
       display: flex; justify-content: space-between; align-items: center;
       margin-top: 12px; flex-shrink: 0;
     }
-    .lb-counter {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 20px; font-weight: 300; color: var(--gold);
-    }
+    .lb-counter { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; color: var(--gold); }
     .lb-hint { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.2); }
     .lb-credit { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.3); }
     .lb-credit span { color: var(--gold); }
-    @media (max-width: 600px) {
-      .lb-hint { display: none; }
-      .lightbox { padding: 16px 56px; }
-    }
 
-    /* Side arrows — fixed to viewport, shown only when lightbox is open */
     .lb-prev, .lb-next {
       position: fixed; top: 50%; transform: translateY(-50%);
       width: 52px; height: 52px;
       border: 1px solid rgba(255,255,255,0.2);
       background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
-      color: rgba(255,255,255,0.75);
-      font-size: 22px;
-      display: none;
-      align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.75); font-size: 22px;
+      display: none; align-items: center; justify-content: center;
       transition: all 0.25s; z-index: 9100;
     }
     .lb-prev { left: 14px; }
     .lb-next { right: 14px; }
-    .lb-prev:hover, .lb-next:hover {
-      border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.12);
-    }
-    @media (max-width: 600px) {
-      .lb-prev { left: 4px; width: 40px; height: 40px; font-size: 18px; }
-      .lb-next { right: 4px; width: 40px; height: 40px; font-size: 18px; }
-    }
+    .lb-prev:hover, .lb-next:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.12); }
 
     /* ── FOOTER ── */
     footer {
@@ -307,13 +298,17 @@
     .footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 300; letter-spacing: 4px; color: var(--gold); }
     .footer-copy { font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 1px; }
 
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1200px) { .masonry-row { /* 3 cols handled by JS */ } }
     @media (max-width: 768px) {
       nav { padding: 16px 20px; }
       .nav-links { gap: 24px; }
       .page-header { padding: 36px 20px 28px; flex-direction: column; align-items: flex-start; gap: 12px; }
       .masonry-wrap { padding: 20px 10px 60px; }
-      .masonry { column-gap: 4px; }
-      .masonry-item { margin-bottom: 4px; }
+      .lightbox { padding: 16px 56px; }
+      .lb-hint { display: none; }
+      .lb-prev { left: 4px; width: 40px; height: 40px; font-size: 18px; }
+      .lb-next { right: 4px; width: 40px; height: 40px; font-size: 18px; }
       footer { flex-direction: column; gap: 10px; text-align: center; padding: 28px 20px; }
     }
   </style>
@@ -341,7 +336,8 @@
   </div>
 
   <div class="masonry-wrap">
-    <div class="masonry" id="masonryGrid"></div>
+    <!-- JS builds the columns here -->
+    <div class="masonry-row" id="masonryRow"></div>
   </div>
 
   <!-- LIGHTBOX -->
@@ -381,20 +377,70 @@
       'gallery.jpg/img3.jpg', 'gallery.jpg/img2.jpg',
     ];
 
-    // Build masonry grid
-    const grid = document.getElementById('masonryGrid');
-    photos.forEach((src, i) => {
-      const item = document.createElement('div');
-      item.className = 'masonry-item';
-      item.dataset.index = i;
-      item.innerHTML = `
-        <img src="${src}" alt="LPU Campus photo ${i+1}" loading="lazy">
-        <div class="overlay"></div>
-        <div class="item-label"><span class="item-num">${String(i+1).padStart(2,'0')}</span></div>`;
-      grid.appendChild(item);
+    // ── BUILD JS MASONRY ──
+    // Instead of CSS columns (which breaks hover), we create real separate
+    // column divs and distribute photos into them like Pinterest does.
+    function getColCount() {
+      const w = window.innerWidth;
+      if (w <= 480) return 1;
+      if (w <= 800) return 2;
+      if (w <= 1200) return 3;
+      return 4;
+    }
+
+    const row = document.getElementById('masonryRow');
+    // Store all item elements in order so lightbox can find them by index
+    const allItems = [];
+
+    function buildGrid() {
+      const colCount = getColCount();
+      row.innerHTML = ''; // clear
+      allItems.length = 0;
+
+      // Create column divs
+      const cols = [];
+      for (let c = 0; c < colCount; c++) {
+        const col = document.createElement('div');
+        col.className = 'masonry-col';
+        row.appendChild(col);
+        cols.push(col);
+      }
+
+      // Distribute photos: round-robin into columns (0,1,2,3,0,1,2,3,...)
+      // This is the simplest Pinterest-style distribution
+      photos.forEach((src, i) => {
+        const item = document.createElement('div');
+        item.className = 'masonry-item';
+        item.dataset.index = i;
+        item.innerHTML = `
+          <img src="${src}" alt="LPU Campus photo ${i + 1}" loading="lazy">
+          <div class="overlay"></div>
+          <div class="item-label">
+            <span class="item-num">${String(i + 1).padStart(2, '0')}</span>
+          </div>`;
+
+        // Direct click listener on each item — no delegation needed
+        item.addEventListener('click', () => openLightbox(i));
+
+        // Direct mouseenter/mouseleave on each item for cursor ring
+        item.addEventListener('mouseenter', () => curRing.classList.add('big'));
+        item.addEventListener('mouseleave', () => curRing.classList.remove('big'));
+
+        cols[i % colCount].appendChild(item);
+        allItems.push(item);
+      });
+    }
+
+    buildGrid();
+
+    // Rebuild on resize so column count stays correct
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(buildGrid, 200);
     });
 
-    // Lightbox elements
+    // ── LIGHTBOX ──
     const lb     = document.getElementById('lightbox');
     const lbImg  = document.getElementById('lbImg');
     const lbWrap = document.getElementById('lbImgWrap');
@@ -404,14 +450,13 @@
     let current  = 0;
 
     function updateCounter() {
-      lbCtr.textContent = `${String(current+1).padStart(2,'0')} / ${photos.length}`;
+      lbCtr.textContent = `${String(current + 1).padStart(2, '0')} / ${photos.length}`;
     }
 
     function openLightbox(idx) {
       current = idx;
-      // KEY FIX: grab src from the thumbnail that's already loaded in the browser
-      // This avoids blank images — we reuse what the browser already has cached
-      const thumb = grid.children[current].querySelector('img');
+      // Get src from the already-loaded thumbnail — never blank
+      const thumb = allItems[current].querySelector('img');
       lbImg.src = thumb.currentSrc || thumb.src;
       updateCounter();
       lb.classList.add('open');
@@ -429,30 +474,20 @@
 
     function navigate(dir) {
       current = (current + dir + photos.length) % photos.length;
-      // Fade out → swap → fade in
       lbWrap.classList.add('fade');
       setTimeout(() => {
-        const thumb = grid.children[current].querySelector('img');
+        const thumb = allItems[current].querySelector('img');
         lbImg.src = thumb.currentSrc || thumb.src;
         updateCounter();
         lbWrap.classList.remove('fade');
       }, 180);
     }
 
-    // Click anywhere on grid → open correct photo (event delegation = works for ALL items)
-    grid.addEventListener('click', e => {
-      const item = e.target.closest('.masonry-item');
-      if (item) openLightbox(parseInt(item.dataset.index));
-    });
-
     document.getElementById('lbClose').onclick = closeLightbox;
     lbPrev.onclick = () => navigate(-1);
     lbNext.onclick = () => navigate(1);
-
-    // Click dark backdrop to close
     lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
 
-    // Keyboard navigation
     document.addEventListener('keydown', e => {
       if (!lb.classList.contains('open')) return;
       if (e.key === 'Escape')     closeLightbox();
@@ -460,7 +495,7 @@
       if (e.key === 'ArrowRight') navigate(1);
     });
 
-    // Touch swipe (mobile) — left swipe = next, right swipe = previous
+    // Touch swipe for mobile
     let tsX = 0, tsY = 0;
     lb.addEventListener('touchstart', e => {
       tsX = e.touches[0].clientX;
@@ -469,14 +504,12 @@
     lb.addEventListener('touchend', e => {
       const dx = e.changedTouches[0].clientX - tsX;
       const dy = e.changedTouches[0].clientY - tsY;
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) {
-        navigate(dx < 0 ? 1 : -1);
-      }
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) navigate(dx < 0 ? 1 : -1);
     }, { passive: true });
 
     // ── CUSTOM CURSOR ──
-    // Event delegation on document.body — catches ALL elements including
-    // dynamically added masonry items, so hover ring works on all 29 photos
+    // mouseenter/mouseleave are attached directly on each item inside buildGrid()
+    // so cursor ring works on ALL photos regardless of scroll position
     const curDot  = document.getElementById('cursor');
     const curRing = document.getElementById('cursorRing');
     let mx = 0, my = 0, rx = 0, ry = 0;
@@ -487,7 +520,6 @@
       curDot.style.top  = my + 'px';
     });
 
-    // Smooth lag for ring
     (function ringLoop() {
       rx += (mx - rx) * 0.12;
       ry += (my - ry) * 0.12;
@@ -496,16 +528,10 @@
       requestAnimationFrame(ringLoop);
     })();
 
-    // Delegated hover — expands ring over any interactive element
-    document.addEventListener('mouseover', e => {
-      if (e.target.closest('a, button, .masonry-item')) {
-        curRing.classList.add('hovered');
-      }
-    });
-    document.addEventListener('mouseout', e => {
-      if (e.target.closest('a, button, .masonry-item')) {
-        curRing.classList.remove('hovered');
-      }
+    // Nav links and buttons also trigger cursor ring
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => curRing.classList.add('big'));
+      el.addEventListener('mouseleave', () => curRing.classList.remove('big'));
     });
   </script>
 </body>
